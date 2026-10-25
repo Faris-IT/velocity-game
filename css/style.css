@@ -25,3 +25,8 @@ html,body{margin:0;height:100%;background:var(--bg);color:var(--text);overflow:h
   [data-act=up]{border-color:var(--orange);color:var(--orange);height:104px}
   #pausebtn{position:fixed;right:16px;top:calc(12px + env(safe-area-inset-top,0px));width:48px;height:48px;border-radius:14px}
 }
+#stats{position:fixed;left:50%;top:calc(10px + env(safe-area-inset-top,0px));transform:translateX(-50%);text-align:center;
+  font-size:14px;line-height:1.5;pointer-events:none;text-shadow:0 0 8px #000}
+#stats .tm{font-size:34px;font-weight:700;font-variant-numeric:tabular-nums;color:#fff;text-shadow:0 0 14px rgba(180,107,255,.7)}
+#center{position:fixed;left:50%;top:40%;transform:translate(-50%,-50%);font-size:96px;font-weight:800;color:var(--orange);
+  text-shadow:0 0 28px rgba(255,138,42,.7);pointer-events:none}

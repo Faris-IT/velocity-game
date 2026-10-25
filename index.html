@@ -5,6 +5,7 @@
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,user-scalable=no">
 <title>Mufa Velocity</title>
 <link rel="stylesheet" href="css/style.css">
+<link rel="stylesheet" href="css/menu.css">
 </head>
 <body>
 <canvas id="game"></canvas>
@@ -12,21 +13,32 @@
   <div id="vname"></div>
   <div id="speed"><b id="kmh">0</b><span>km/h</span></div>
 </div>
+<div id="stats"></div>
+<div id="center"></div>
 <div id="msg"></div>
-<div id="help">W/↑ gas &nbsp; S/↓ rem &nbsp; A/D belok &nbsp; P jeda &nbsp; R ulang &nbsp; 1 2 3 ganti kendaraan</div>
+<div id="screen"></div>
+<div id="help">W/↑ gas &nbsp; S/↓ rem &nbsp; A/D belok &nbsp; P jeda &nbsp; R ulang </div>
 <div id="touch">
   <div class="pad left"><button data-act="left">◀</button><button data-act="right">▶</button></div>
   <div class="pad right"><button data-act="down">REM</button><button data-act="up">GAS</button></div>
   <button id="pausebtn" data-act="pause">II</button>
 </div>
 <script src="js/config.js"></script>
+<script src="data/modes.js"></script>
 <script src="data/vehicles.js"></script>
 <script src="data/tracks.js"></script>
+<script src="js/storage.js"></script>
 <script src="js/input.js"></script>
 <script src="js/track.js"></script>
 <script src="js/vehicle.js"></script>
 <script src="js/collision.js"></script>
 <script src="js/physics.js"></script>
+<script src="js/checkpoints.js"></script>
+<script src="js/scoring.js"></script>
+<script src="js/game-state.js"></script>
+<script src="modes/grand-prix.js"></script>
+<script src="modes/time-attack.js"></script>
+<script src="js/ui.js"></script>
 <script src="js/renderer.js"></script>
 <script src="js/main.js"></script>
 </body>

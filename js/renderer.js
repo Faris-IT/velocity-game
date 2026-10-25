@@ -66,13 +66,25 @@ MV.Renderer = {
       if (s.life <= 0) this.sparks.splice(i, 1);
     }
   },
-  draw(car) {
+  drawCheckpoints(g, cp) {
+    const H = MV.CONFIG.TRACK_HALF, pulse = 0.65 + 0.35 * Math.sin(Date.now() / 160);
+    cp.idx.forEach((pi, k) => {
+      const p = this.track.pts[pi], nx = -p.ty, ny = p.tx, next = k === cp.next;
+      if (!next && k === 0) return;
+      g.strokeStyle = next ? '#ff8a2a' : 'rgba(34,229,255,.28)'; g.lineWidth = next ? 6 : 3;
+      g.globalAlpha = next ? pulse : 1; g.shadowColor = '#ff8a2a'; g.shadowBlur = next ? 16 : 0;
+      g.beginPath(); g.moveTo(p.x - nx * H, p.y - ny * H); g.lineTo(p.x + nx * H, p.y + ny * H); g.stroke();
+    });
+    g.globalAlpha = 1; g.shadowBlur = 0;
+  },
+  draw(car, race) {
     const g = this.ctx, d = this.dpr, c = this.cam, z = c.z;
     const sx = (Math.random() - 0.5) * 14 * this.shake, sy = (Math.random() - 0.5) * 14 * this.shake;
     g.setTransform(1, 0, 0, 1, 0, 0); g.fillStyle = '#05070f'; g.fillRect(0, 0, this.cv.width, this.cv.height);
     g.setTransform(d * z, 0, 0, d * z, d * (this.w / 2 - c.x * z + sx), d * (this.h / 2 - c.y * z + sy));
     g.drawImage(this.off, this.ox, this.oy);
 
+    if (race && race.cp) this.drawCheckpoints(g, race.cp);
     g.lineWidth = 5; g.lineCap = 'round';                // jejak kendaraan
     for (let i = 1; i < this.trail.length; i++) {
       g.strokeStyle = car.spec.color; g.globalAlpha = i / this.trail.length * 0.35;

@@ -2,7 +2,7 @@
 MV.buildTrack = function (def) {
   const M = 4000, N = 800, dense = [];
   for (let i = 0; i < M; i++) {
-    const t = i / M * Math.PI * 2, c = Math.cos(t), s = Math.sin(t);
+    const t = -i / M * Math.PI * 2, c = Math.cos(t), s = Math.sin(t);
     dense.push({ x: def.a * Math.sign(c) * Math.pow(Math.abs(c), 2 / def.n),
                  y: def.b * Math.sign(s) * Math.pow(Math.abs(s), 2 / def.n) });
   }

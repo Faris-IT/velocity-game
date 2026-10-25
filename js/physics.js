@@ -3,6 +3,8 @@
 MV.stepCar = function (car, inp, dt, track) {
   const s = car.spec, C = MV.CONFIG;
   car.steer += (inp.steer - car.steer) * Math.min(1, dt * 9);
+  car.hitCool = Math.max(0, car.hitCool - dt);
+  if (!car.onTrack) car.offTime += dt;
 
   const co = Math.cos(car.angle), si = Math.sin(car.angle);
   let vf = car.vx * co + car.vy * si, vl = -car.vx * si + car.vy * co;
