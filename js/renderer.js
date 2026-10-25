@@ -84,7 +84,7 @@ MV.Renderer = {
     g.globalAlpha = 1; g.shadowBlur = 0;
   },
   drawTokens(g, race) {
-    const col = { main: '#22e5ff', risk: '#ff8a2a', blink: '#b46bff' };
+    const col = { main: '#22e5ff', risk: '#ff8a2a', blink: '#b46bff', out: '#22e5ff', in: '#ff8a2a' };
     race.tokens.forEach(t => {
       if (!t.alive) return;
       const vis = MV.Tokens.visible(t, race.time);
@@ -93,6 +93,23 @@ MV.Renderer = {
       g.beginPath(); g.arc(t.x, t.y, 12 + (vis ? 2 * Math.sin(Date.now() / 200) : 0), 0, 6.283); g.stroke();
     });
     g.globalAlpha = 1; g.shadowBlur = 0;
+  },
+  drawGates(g, G) {
+    const col = { single: '#ff8a2a', safe: '#22e5ff', short: '#b46bff' };
+    G.list.forEach(t => {
+      const now = t.step === G.step, nxt = t.step === G.step + 1;
+      if (!now && !nxt) return;
+      g.globalAlpha = now ? 1 : 0.22; g.strokeStyle = g.fillStyle = col[t.kind]; g.shadowColor = col[t.kind]; g.shadowBlur = now ? 16 : 0; g.lineWidth = 4;
+      g.beginPath(); g.arc(t.x, t.y, t.r + (now ? 2 * Math.sin(Date.now() / 150) : 0), 0, 6.283); g.stroke();
+      g.shadowBlur = 0; g.font = 'bold 16px sans-serif'; g.textAlign = 'center'; g.fillText((t.step + 1) + (t.bonus ? ' +' + t.bonus + 's' : ''), t.x, t.y + 6);
+    });
+    g.globalAlpha = 1; g.shadowBlur = 0;
+  },
+  drawGhost(g, race) {
+    const q = MV.Ghost.at(race.gh, race.time);
+    g.save(); g.translate(q.x, q.y); g.rotate(q.a); g.globalAlpha = 0.45; g.strokeStyle = '#fff'; g.fillStyle = 'rgba(255,255,255,.12)'; g.lineWidth = 2.5; g.lineJoin = 'round';
+    g.beginPath(); [[22, 0], [8, -9], [-14, -12], [-18, -6], [-18, 6], [-14, 12], [8, 9]].forEach((p, i) => i ? g.lineTo(p[0], p[1]) : g.moveTo(p[0], p[1]));
+    g.closePath(); g.fill(); g.stroke(); g.restore();
   },
   drawObstacles(g, race) {
     race.obstacles.forEach(o => {
@@ -114,6 +131,8 @@ MV.Renderer = {
     if (race && race.cp) this.drawCheckpoints(g, race.cp);
     if (race && race.tokens) this.drawTokens(g, race);
     if (race && race.obstacles) this.drawObstacles(g, race);
+    if (race && race.gates) this.drawGates(g, race.gates);
+    if (race && race.gh && race.time > 0) this.drawGhost(g, race);
     g.lineWidth = 5; g.lineCap = 'round';                // jejak kendaraan
     for (let i = 1; i < this.trail.length; i++) {
       g.strokeStyle = car.spec.color; g.globalAlpha = i / this.trail.length * 0.35;

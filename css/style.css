@@ -47,3 +47,7 @@ html,body{margin:0;height:100%;background:var(--bg);color:var(--text);overflow:h
     background:rgba(10,16,32,.55);color:var(--purple);font-weight:700;font-size:14px;touch-action:none}
   #boostbtn.on{background:rgba(180,107,255,.3);box-shadow:0 0 18px rgba(180,107,255,.7)}
 }
+#hp{display:none;width:150px;height:8px;border:1px solid rgba(255,90,90,.7);border-radius:5px;margin-top:4px;overflow:hidden}
+#hp.on{display:block}
+#hpfill{display:block;height:100%;width:100%;background:linear-gradient(90deg,#ff3b3b,#4dff9a)}
+body.menu #hud,body.menu #help,body.menu #touch,body.menu #stats{display:none!important}

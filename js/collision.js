@@ -14,6 +14,6 @@ MV.resolveWalls = function (car, track) {
     car.vx *= k; car.vy *= k;
     car.hit = Math.max(car.hit, Math.min(1, vn / 300));
     car.hitX = car.x + nx * C.CAR_RADIUS; car.hitY = car.y + ny * C.CAR_RADIUS;
-    if (vn > 90 && car.hitCool <= 0) { car.hits++; car.hitCool = 0.4; }   // hitung benturan nyata, bukan gesekan
+    if (vn > 90 && car.hitCool <= 0) { car.hits++; car.hitTypes.push('wall'); car.hitCool = 0.4; }   // hitung benturan nyata, bukan gesekan
   }
 };

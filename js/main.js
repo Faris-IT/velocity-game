@@ -2,8 +2,8 @@
   const C = MV.CONFIG, R = MV.Renderer, UI = MV.UI;
   const $ = id => document.getElementById(id);
   const track = MV.buildTrack(MV.TRACKS.oval);
-  const el = { kmh: $('kmh'), name: $('vname'), msg: $('msg'), stats: $('stats'), center: $('center'), fx: $('fx'), coach: $('coach'), boost: $('boost'), bfill: $('bfill') };
-  const sel = { mode: 'grandprix', veh: 'viper', laps: 3 };
+  const el = { kmh: $('kmh'), name: $('vname'), msg: $('msg'), stats: $('stats'), center: $('center'), fx: $('fx'), coach: $('coach'), boost: $('boost'), bfill: $('bfill'), hp: $('hp'), hpfill: $('hpfill') };
+  const sel = { mode: 'grandprix', veh: 'viper', laps: 3, mission: 0 };
   let car, race = null, phase = 'menu', paused = false, acc = 0, last = performance.now(), lastStart = { id: 'grandprix' };
   const shown = { kmh: -1, msg: '', stats: '', center: '', fx: '', coach: '', bar: -1 };
 
@@ -18,7 +18,7 @@
     lastStart = c || lastStart;
     setCar(lastStart.veh || sel.veh);
     const def = MV.MODE_LIST.find(m => m.id === lastStart.id) || { id: lastStart.id, name: lastStart.id };
-    race = MV.newRace(def, { laps: sel.laps, veh: lastStart.veh || sel.veh }, track);
+    race = MV.newRace(def, { laps: sel.laps, veh: lastStart.veh || sel.veh, mission: lastStart.mission || 0 }, track);
     if (race.mode.noCountdown) race.cd = 0;
     phase = 'countdown'; paused = false; UI.hide();
   }
@@ -26,7 +26,8 @@
     if (phase !== 'racing' && phase !== 'countdown') return;
     paused = p; if (p) UI.pause(); else UI.hide();
   }
-  function toMenu() { phase = 'menu'; paused = false; idle(); UI.menu(); }
+  function toMenu() {
+     phase = 'menu'; paused = false; idle(); UI.menu(); }
 
   UI.onAction((a, v) => {
     if (a === 'play') UI.modes(sel);
@@ -38,7 +39,8 @@
     else if (a === 'mode') { sel.mode = v; UI.modes(sel); }
     else if (a === 'veh') { sel.veh = v; idle(); UI.modes(sel); }
     else if (a === 'laps') { sel.laps = +v; UI.modes(sel); }
-    else if (a === 'start') startRace({ id: sel.mode });
+    else if (a === 'mis') { sel.mission = +v; UI.modes(sel); }
+    else if (a === 'start') startRace({ id: sel.mode, mission: sel.mission, veh: sel.mode === 'trials' ? MV.TRIALS[sel.mission].veh : undefined });
     else if (a === 'retry') startRace();
     else if (a === 'resume') setPaused(false);
   });
@@ -60,6 +62,10 @@
     const bar = Math.round(car.energy / car.spec.boost * 100);
     if (bar !== shown.bar) { shown.bar = bar; el.bfill.style.width = bar + '%'; }
     el.boost.classList.toggle('chg', car.charging);
+    const useHP = !!(race && phase !== 'menu' && race.mode.useHP);
+    el.hp.classList.toggle('on', useHP);
+    if (useHP) el.hpfill.style.width = Math.max(0, race.hp) + '%';
+    document.body.classList.toggle('menu', phase === 'menu');
     let msg = '', center = '', stats = '', coach = '', fx = '';
     if (race && phase !== 'menu') {
       const h = race.mode.hud(race);
@@ -82,7 +88,11 @@
   function frame(now) {
     requestAnimationFrame(frame);
     const dt = Math.min((now - last) / 1000, C.MAX_FRAME); last = now;
-    if (!paused) {
+    if (phase === 'menu') {                                  // demo otomatis di belakang menu
+      acc += dt;
+      while (acc >= C.STEP) { MV.stepCar(car, MV.Demo.inp(car, track), C.STEP, track); acc -= C.STEP; }
+      R.update(dt, car);
+    } else if (!paused) {
       if (phase === 'countdown') { race.cd -= dt; if (race.cd <= 0) { phase = 'racing'; race.goT = 0.9; acc = 0; } }
       else if (phase === 'racing') {
         acc += dt;
