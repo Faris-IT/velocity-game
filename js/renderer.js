@@ -34,6 +34,12 @@ MV.Renderer = {
     layer(2 * (H + G) - 4, '#08101c');                   // area luar lintasan
     layer(2 * H + 10, '#22e5ff', '#22e5ff', 16);         // tepi lintasan
     layer(2 * H, '#0e1428');                             // aspal
+    t.zones.forEach(z => {                               // zona pengisian energi
+      const zp = new Path2D();
+      for (let i = z[0]; i <= z[1]; i++) i === z[0] ? zp.moveTo(t.pts[i].x, t.pts[i].y) : zp.lineTo(t.pts[i].x, t.pts[i].y);
+      g.shadowBlur = 0; g.lineWidth = 2 * H - 12; g.strokeStyle = 'rgba(34,229,255,.15)'; g.lineCap = 'butt'; g.stroke(zp);
+      g.lineWidth = 2; g.strokeStyle = 'rgba(34,229,255,.5)'; g.setLineDash([14, 22]); g.stroke(zp); g.setLineDash([]);
+    });
     g.setLineDash([30, 40]); layer(3, 'rgba(180,107,255,.45)'); g.setLineDash([]);
 
     const p0 = t.pts[0];                                 // garis start/finis
@@ -77,6 +83,27 @@ MV.Renderer = {
     });
     g.globalAlpha = 1; g.shadowBlur = 0;
   },
+  drawTokens(g, race) {
+    const col = { main: '#22e5ff', risk: '#ff8a2a', blink: '#b46bff' };
+    race.tokens.forEach(t => {
+      if (!t.alive) return;
+      const vis = MV.Tokens.visible(t, race.time);
+      g.globalAlpha = vis ? 1 : 0.18; g.fillStyle = g.strokeStyle = col[t.kind]; g.shadowColor = col[t.kind]; g.shadowBlur = vis ? 14 : 0;
+      g.lineWidth = 2; g.beginPath(); g.arc(t.x, t.y, 8, 0, 6.283); g.fill();
+      g.beginPath(); g.arc(t.x, t.y, 12 + (vis ? 2 * Math.sin(Date.now() / 200) : 0), 0, 6.283); g.stroke();
+    });
+    g.globalAlpha = 1; g.shadowBlur = 0;
+  },
+  drawObstacles(g, race) {
+    race.obstacles.forEach(o => {
+      if (o.down > 0) return;
+      g.shadowBlur = 12;
+      if (o.type === 'cone') { g.shadowColor = g.fillStyle = '#ff8a2a'; g.beginPath(); g.moveTo(o.x, o.y - 12); g.lineTo(o.x - 10, o.y + 9); g.lineTo(o.x + 10, o.y + 9); g.closePath(); g.fill(); }
+      else { g.shadowColor = g.strokeStyle = '#b46bff'; g.fillStyle = '#1a1030'; g.lineWidth = 3; g.beginPath(); g.arc(o.x, o.y, o.r, 0, 6.283); g.fill(); g.stroke();
+        g.beginPath(); g.moveTo(o.x - 9, o.y - 9); g.lineTo(o.x + 9, o.y + 9); g.moveTo(o.x + 9, o.y - 9); g.lineTo(o.x - 9, o.y + 9); g.stroke(); }
+    });
+    g.shadowBlur = 0;
+  },
   draw(car, race) {
     const g = this.ctx, d = this.dpr, c = this.cam, z = c.z;
     const sx = (Math.random() - 0.5) * 14 * this.shake, sy = (Math.random() - 0.5) * 14 * this.shake;
@@ -85,6 +112,8 @@ MV.Renderer = {
     g.drawImage(this.off, this.ox, this.oy);
 
     if (race && race.cp) this.drawCheckpoints(g, race.cp);
+    if (race && race.tokens) this.drawTokens(g, race);
+    if (race && race.obstacles) this.drawObstacles(g, race);
     g.lineWidth = 5; g.lineCap = 'round';                // jejak kendaraan
     for (let i = 1; i < this.trail.length; i++) {
       g.strokeStyle = car.spec.color; g.globalAlpha = i / this.trail.length * 0.35;
@@ -96,6 +125,7 @@ MV.Renderer = {
     g.globalAlpha = 1;
 
     g.save(); g.translate(car.x, car.y); g.rotate(car.angle);
+    if (car.boosting) { g.fillStyle = 'rgba(255,138,42,.9)'; g.shadowColor = '#ff8a2a'; g.shadowBlur = 18; g.beginPath(); g.moveTo(-18, -5); g.lineTo(-36 - Math.random() * 14, 0); g.lineTo(-18, 5); g.fill(); }
     g.shadowColor = car.spec.color; g.shadowBlur = 14;
     g.fillStyle = '#0b1020'; g.strokeStyle = car.spec.color; g.lineWidth = 2.5; g.lineJoin = 'round';
     g.beginPath();

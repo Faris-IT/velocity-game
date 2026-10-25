@@ -4,6 +4,8 @@ MV.Scoring = {
   TA_SCORE: { Gold: 6500, Silver: 5000, Bronze: 3000 },
   TA_LAP_TARGET: 22, TA_HIT_PENALTY: 50,
   fmt(t) { t = Math.max(0, t); const m = Math.floor(t / 60), s = t - m * 60; return m + ':' + (s < 10 ? '0' : '') + s.toFixed(2); },
+  medalLow(v, T) { return v <= T.Gold ? 'Gold' : v <= T.Silver ? 'Silver' : v <= T.Bronze ? 'Bronze' : null; },
+  medalHigh(v, T) { return v >= T.Gold ? 'Gold' : v >= T.Silver ? 'Silver' : v >= T.Bronze ? 'Bronze' : null; },
   best(list) { return list.length ? Math.min.apply(null, list) : null; },
   lapBonus(lt) { return 1000 + Math.max(0, Math.round((this.TA_LAP_TARGET - lt) * 30)); },
   finishGrandPrix(r) {

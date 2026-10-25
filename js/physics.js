@@ -11,6 +11,7 @@ MV.stepCar = function (car, inp, dt, track) {
   const top = s.top * (car.onTrack ? 1 : C.GRASS_TOP);
 
   car.braking = false;
+  vf = MV.Boost.apply(car, inp, vf, dt, track);
   if (inp.throttle) vf += (vf < 0 ? s.brake : s.accel * Math.max(0.08, 1 - vf / top)) * dt;
   if (inp.brake) {
     if (vf > 5) { vf -= s.brake * dt; car.braking = true; }
@@ -18,7 +19,8 @@ MV.stepCar = function (car, inp, dt, track) {
   }
   if (!inp.throttle && !inp.brake) vf -= Math.sign(vf) * Math.min(Math.abs(vf), 60 * dt);
   if (!car.onTrack) vf -= vf * C.GRASS_DRAG * dt;
-  vf = Math.min(vf, s.top);
+  const cap = car.boosting ? s.top * C.BOOST_TOP : s.top;
+  if (vf > cap) vf = car.boosting ? cap : Math.max(cap, vf - (vf - cap) * 2 * dt);
 
   vl *= Math.exp(-s.grip * (car.onTrack ? 1 : 0.6) * dt);                 // grip meredam gelincir
   vf -= Math.sign(vf) * Math.min(Math.abs(vf), Math.abs(vl) * 0.6 * dt);   // gelincir memakan kecepatan

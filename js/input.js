@@ -24,7 +24,7 @@ MV.Input = (function () {
     on(fn) { handlers.push(fn); },
     read() {
       const l = key.left || touch.left, r = key.right || touch.right;
-      return { throttle: !!(key.up || touch.up), brake: !!(key.down || touch.down), steer: (r ? 1 : 0) - (l ? 1 : 0) };
+      return { throttle: !!(key.up || touch.up), brake: !!(key.down || touch.down), steer: (r ? 1 : 0) - (l ? 1 : 0), boost: !!(key.boost || touch.boost) };
     }
   };
 })();

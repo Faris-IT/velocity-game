@@ -31,3 +31,7 @@ h2.win{color:var(--cyan)}h2.lose{color:var(--orange)}
 .badge{color:var(--orange);font-weight:700;font-size:13px;letter-spacing:.1em}
 table{width:100%;border-collapse:collapse;font-size:14px}
 td{padding:6px 4px;border-bottom:1px solid rgba(255,255,255,.08);text-align:left}td+td{text-align:right;font-variant-numeric:tabular-nums}
+.tcard{text-align:left;gap:6px}.tcard p{font-size:12.5px;margin:4px 0}
+.st{display:flex;align-items:center;gap:8px;font-size:11.5px}.st span{width:72px;opacity:.75}
+.st div{flex:1;height:6px;border-radius:4px;background:rgba(255,255,255,.1);overflow:hidden}
+.st i{display:block;height:100%;background:linear-gradient(90deg,#22e5ff,#b46bff)}

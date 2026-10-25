@@ -22,10 +22,12 @@ MV.buildTrack = function (def) {
     p.tx = (b.x - a.x) / l; p.ty = (b.y - a.y) / l;
     minX = Math.min(minX, p.x); maxX = Math.max(maxX, p.x); minY = Math.min(minY, p.y); maxY = Math.max(maxY, p.y);
   });
+  const zones = (def.zones || []).map(z => [Math.round(z[0] * N), Math.round(z[1] * N)]);
   const sp = pts[N - 14];
   return {
-    def, pts, N, length, bounds: { minX, minY, maxX, maxY },
+    def, pts, N, length, zones, bounds: { minX, minY, maxX, maxY },
     start: { x: sp.x, y: sp.y, angle: Math.atan2(sp.ty, sp.tx) },
+    inZone(i) { for (let k = 0; k < zones.length; k++) if (i >= zones[k][0] && i <= zones[k][1]) return true; return false; },
     // titik tengah lintasan terdekat dari posisi (x, y)
     nearest(x, y) {
       let bi = 0, bd = 1e18;

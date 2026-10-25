@@ -1,7 +1,7 @@
 // localStorage dengan validasi: data kosong atau rusak tidak boleh membuat game gagal dibuka.
 MV.Storage = (function () {
   const KEY = 'mufaVelocity.v1';
-  const blank = () => ({ best: {}, hi: {}, bestLap: {}, stats: { races: 0, wins: 0, laps: 0, hits: 0 } });
+  const blank = () => ({ best: {}, hi: {}, bestLap: {}, stats: { races: 0, wins: 0, laps: 0, hits: 0 }, flags: { tutorial: false } });
   let data = blank();
   const num = v => typeof v === 'number' && isFinite(v) && v >= 0;
   const cleanMap = o => { const r = {}; if (o && typeof o === 'object') for (const k in o) if (num(o[k])) r[k] = o[k]; return r; };
@@ -10,6 +10,7 @@ MV.Storage = (function () {
     const o = JSON.parse(localStorage.getItem(KEY));
     if (o && typeof o === 'object') {
       data.best = cleanMap(o.best); data.hi = cleanMap(o.hi); data.bestLap = cleanMap(o.bestLap);
+      data.flags.tutorial = !!(o.flags && o.flags.tutorial === true);
       for (const k in data.stats) if (o.stats && num(o.stats[k])) data.stats[k] = o.stats[k];
     }
   } catch (e) { /* abaikan, pakai data kosong */ }
@@ -18,10 +19,12 @@ MV.Storage = (function () {
 
   return {
     get() { return data; },
+    setFlag(name) { data.flags[name] = true; save(); },
     // dipanggil sekali per balapan setelah hasil keluar
     record(race) {
       if (race.recorded) return race.recInfo;
       race.recorded = true;
+      if (!race.result.recordKey) { race.recInfo = { newBest: false, newLap: false }; return race.recInfo; }
       const res = race.result, k = res.recordKey, st = data.stats, info = { newBest: false, newLap: false };
       st.races++; if (res.win) st.wins++; st.laps += race.laps; st.hits += race.hits;
       if (res.better === 'low') { if (!(k in data.best) || res.value < data.best[k]) { info.newBest = true; data.best[k] = res.value; } }
