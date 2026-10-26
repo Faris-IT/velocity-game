@@ -1,7 +1,7 @@
 MV.MODES = {};   // logika tiap mode didaftarkan oleh modes/*.js
 
 MV.newRace = function (def, opts, track) {
-  const r = { def, track, mode: MV.MODES[def.id], opts, cd: 3, goT: 0, time: 0, laps: 0, lapTimes: [],
+  const r = { def, track, trackId: track.id, mode: MV.MODES[def.id], opts, cd: 3, goT: 0, time: 0, laps: 0, lapTimes: [],
               penalty: 0, hits: 0, lastHits: 0, lastOff: 0, wasOn: true, pIdx: -1, prog: 0, dTypes: [], dHits: 0, dOff: 0, dEnt: 0,
               msg: '', msgT: 0, result: null, recorded: false, tokens: null, obstacles: null,
               cp: MV.Checkpoints.create(track) };
@@ -24,6 +24,7 @@ MV.stepRace = function (r, car, inp, track, dt) {
   r.penalty += r.dHits * 1 + r.dOff * 0.5;     // 1 dtk per tabrakan, 0,5 dtk per detik di luar lintasan
   r.hits += r.dHits; r.lastHits = car.hits; r.lastOff = car.offTime;
   MV.Drift.update(car, dt);
+  if (r.npcs) MV.NPC.step(r, car, dt);
   if (r.ghostRec) MV.Ghost.record(r.ghostRec, r, car, dt);
   if (r.gates) MV.Gates.update(r.gates, car).forEach(e => { if (M.onGate) M.onGate(r, e, car); });
   if (r.tokens) MV.Tokens.update(r.tokens, car, r.time).forEach(t => {

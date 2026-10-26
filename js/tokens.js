@@ -6,11 +6,8 @@ MV.Tokens = {
       return { x: p.x - p.ty * s.lat, y: p.y + p.tx * s.lat, kind: s.kind, v: s.v || 0, phase: s.phase || 0, alive: true, r: 13 };
     });
   },
-  // +1 jika sisi normal positif mengarah ke dalam (mendekati pusat lintasan), -1 jika sebaliknya
-  insideSign(track, idx) {
-    const p = track.pts[idx % track.N];
-    return Math.hypot(p.x - p.ty * 10, p.y + p.tx * 10) < Math.hypot(p.x, p.y) ? 1 : -1;
-  },
+  // +1 jika sisi normal positif mengarah ke dalam tikungan, -1 jika sebaliknya
+  insideSign(track, idx) { return track.insideSign(idx % track.N); },
   visible(t, time) { return t.kind !== 'blink' || ((time + t.phase) % 8) < 4.5; },
   update(list, car, time) {
     const got = [], R = MV.CONFIG.CAR_RADIUS;

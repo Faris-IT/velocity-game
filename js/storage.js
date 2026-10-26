@@ -1,13 +1,14 @@
 // localStorage dengan validasi: data kosong atau rusak tidak boleh membuat game gagal dibuka.
+// Rekor selain Oval memakai akhiran "@id-lintasan" agar tiap lintasan punya papan rekor sendiri.
 MV.Storage = (function () {
   const KEY = 'mufaVelocity.v1';
-  const blank = () => ({ best: {}, hi: {}, bestLap: {}, stats: { races: 0, wins: 0, laps: 0, hits: 0 }, flags: { tutorial: false }, medals: {}, ghosts: {} });
   const MR = { Bronze: 1, Silver: 2, Gold: 3 };
-  const goodGhost = g => g && typeof g === 'object' && typeof g.time === 'number' && isFinite(g.time) && Array.isArray(g.s) && g.s.length > 1 && g.s.length < 8000 &&
-    g.s.every(a => Array.isArray(a) && a.length === 4 && a.every(n => typeof n === 'number' && isFinite(n)));
-  let data = blank();
+  const blank = () => ({ best: {}, hi: {}, bestLap: {}, stats: { races: 0, wins: 0, laps: 0, hits: 0 }, flags: { tutorial: false }, medals: {}, ghosts: {} });
   const num = v => typeof v === 'number' && isFinite(v) && v >= 0;
   const cleanMap = o => { const r = {}; if (o && typeof o === 'object') for (const k in o) if (num(o[k])) r[k] = o[k]; return r; };
+  const goodGhost = g => g && typeof g === 'object' && typeof g.time === 'number' && isFinite(g.time) && Array.isArray(g.s) && g.s.length > 1 && g.s.length < 12000 &&
+    g.s.every(a => Array.isArray(a) && a.length === 4 && a.every(n => typeof n === 'number' && isFinite(n)));
+  let data = blank();
 
   try {
     const o = JSON.parse(localStorage.getItem(KEY));
@@ -21,24 +22,27 @@ MV.Storage = (function () {
   } catch (e) { /* abaikan, pakai data kosong */ }
 
   function save() { try { localStorage.setItem(KEY, JSON.stringify(data)); } catch (e) { /* penyimpanan penuh/diblokir */ } }
+  const suf = tid => (!tid || tid === 'oval') ? '' : '@' + tid;
 
   return {
     get() { return data; },
-    getGhost(veh) { const g = data.ghosts[veh]; return g ? { time: g.time, s: g.s, ptr: 0 } : null; },
-    saveGhost(veh, g) { data.ghosts[veh] = { time: g.time, s: g.s }; save(); },
+    suf,
+    getGhost(veh, tid) { const g = data.ghosts[veh + suf(tid)]; return g ? { time: g.time, s: g.s, ptr: 0 } : null; },
+    saveGhost(veh, tid, g) { data.ghosts[veh + suf(tid)] = { time: g.time, s: g.s }; save(); },
     setFlag(name) { data.flags[name] = true; save(); },
     // dipanggil sekali per balapan setelah hasil keluar
     record(race) {
       if (race.recorded) return race.recInfo;
       race.recorded = true;
-      if (!race.result.recordKey) { race.recInfo = { newBest: false, newLap: false }; return race.recInfo; }
-      const res = race.result, k = res.recordKey, st = data.stats, info = { newBest: false, newLap: false };
+      const res = race.result, info = { newBest: false, newLap: false };
+      if (!res.recordKey) { race.recInfo = info; return info; }
+      const sf = res.noTrackKey ? '' : suf(race.trackId), k = res.recordKey + sf, st = data.stats;
       st.races++; if (res.win) st.wins++; st.laps += race.laps; st.hits += race.hits;
       if (res.better === 'low') { if (!(k in data.best) || res.value < data.best[k]) { info.newBest = true; data.best[k] = res.value; } }
       else if (!(k in data.hi) || res.value > data.hi[k]) { info.newBest = res.value > 0; if (info.newBest) data.hi[k] = res.value; }
-      const bl = MV.Scoring.best(race.lapTimes);
-      if (bl !== null && (!('oval' in data.bestLap) || bl < data.bestLap.oval)) { info.newLap = true; data.bestLap.oval = bl; }
-      const mk = res.medalKey || race.def.id;
+      const bl = MV.Scoring.best(race.lapTimes), tk = race.trackId || 'oval';
+      if (bl !== null && (!(tk in data.bestLap) || bl < data.bestLap[tk])) { info.newLap = true; data.bestLap[tk] = bl; }
+      const mk = (res.medalKey || race.def.id) + (res.medalKey === 'cup' ? '' : sf);
       if (res.medal && MR[res.medal] > (MR[data.medals[mk]] || 0)) data.medals[mk] = res.medal;
       save(); race.recInfo = info; return info;
     }

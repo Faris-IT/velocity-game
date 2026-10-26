@@ -1,9 +1,9 @@
 MV.MODES.ghostrival = {
   useGhost: true, DEFAULT_TIME: 34,
   init(r) {
-    r.target = 2; r.limit = 90;
-    r.stored = MV.Storage.getGhost(r.opts.veh);
-    r.gh = r.stored || MV.Ghost.builtin(r.track, r.target, this.DEFAULT_TIME);
+    r.target = 2; r.limit = 90 * r.track.tscale;
+    r.stored = MV.Storage.getGhost(r.opts.veh, r.trackId);
+    r.gh = r.stored || MV.Ghost.builtin(r.track, r.target, this.DEFAULT_TIME * r.track.tscale);
     r.gh.ptr = 0; r.ghostRec = MV.Ghost.newRec(); r.gap = 0;
   },
   update(r) {
@@ -15,7 +15,7 @@ MV.MODES.ghostrival = {
     if (r.laps < r.target) return;
     const S = MV.Scoring, beat = r.time < r.gh.time, diff = r.time - r.gh.time;
     const save = !r.stored || r.time < r.stored.time;
-    if (save) MV.Storage.saveGhost(r.opts.veh, { time: r.time, s: r.ghostRec.s });
+    if (save) MV.Storage.saveGhost(r.opts.veh, r.trackId, { time: r.time, s: r.ghostRec.s });
     r.end({ win: beat, title: beat ? 'GHOST DIKALAHKAN!' : 'GHOST MENANG', mainLabel: 'Waktu', main: S.fmt(r.time), medal: null, noMedal: true,
       lines: [[r.stored ? 'Waktu ghost' : 'Target bawaan', S.fmt(r.gh.time)], ['Selisih', (diff > 0 ? '+' : '') + diff.toFixed(2) + ' dtk'], ['Ghost baru tersimpan', save ? 'ya' : 'tidak']],
       recordKey: 'ghostrival', value: r.time, better: 'low' });

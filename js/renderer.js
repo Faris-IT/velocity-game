@@ -1,10 +1,11 @@
 MV.Renderer = {
   init(canvas, track) {
-    this.cv = canvas; this.ctx = canvas.getContext('2d'); this.track = track;
+    this.cv = canvas; this.ctx = canvas.getContext('2d');
     this.cam = { x: 0, y: 0, z: 1 }; this.shake = 0; this.trail = []; this.sparks = []; this.trailT = 0;
-    this.bake(); this.resize();
+    this.setTrack(track); this.resize();
     addEventListener('resize', () => this.resize());
   },
+  setTrack(track) { this.track = track; this.trail.length = 0; this.bake(); },
   resize() {
     const d = this.dpr = Math.min(window.devicePixelRatio || 1, 2);
     this.w = innerWidth; this.h = innerHeight;
@@ -13,39 +14,56 @@ MV.Renderer = {
   },
   // Lintasan statis digambar sekali ke canvas terpisah agar frame tetap ringan.
   bake() {
-    const C = MV.CONFIG, t = this.track, b = t.bounds, H = C.TRACK_HALF, G = C.GRASS, m = H + G + 160;
+    const C = MV.CONFIG, t = this.track, b = t.bounds, G = C.GRASS, m = Math.max.apply(null, t.hw) + G + 160;
+    const W = b.maxX - b.minX + m * 2, Hh = b.maxY - b.minY + m * 2, bs = Math.min(1, Math.sqrt(9e6 / (W * Hh)));
     const off = this.off = document.createElement('canvas');
-    this.ox = b.minX - m; this.oy = b.minY - m;
-    off.width = Math.ceil(b.maxX - b.minX + m * 2); off.height = Math.ceil(b.maxY - b.minY + m * 2);
+    this.ox = b.minX - m; this.oy = b.minY - m; this.ow = W; this.oh = Hh;
+    off.width = Math.ceil(W * bs); off.height = Math.ceil(Hh * bs);
     const g = off.getContext('2d');
-    g.translate(-this.ox, -this.oy);
-    g.fillStyle = '#05070f'; g.fillRect(this.ox, this.oy, off.width, off.height);
+    g.scale(bs, bs); g.translate(-this.ox, -this.oy);
+    g.fillStyle = '#05070f'; g.fillRect(this.ox, this.oy, W, Hh);
     g.strokeStyle = 'rgba(90,130,255,.07)'; g.lineWidth = 1; g.beginPath();
-    for (let x = Math.ceil(this.ox / 120) * 120; x < this.ox + off.width; x += 120) { g.moveTo(x, this.oy); g.lineTo(x, this.oy + off.height); }
-    for (let y = Math.ceil(this.oy / 120) * 120; y < this.oy + off.height; y += 120) { g.moveTo(this.ox, y); g.lineTo(this.ox + off.width, y); }
+    for (let x = Math.ceil(this.ox / 120) * 120; x < this.ox + W; x += 120) { g.moveTo(x, this.oy); g.lineTo(x, this.oy + Hh); }
+    for (let y = Math.ceil(this.oy / 120) * 120; y < this.oy + Hh; y += 120) { g.moveTo(this.ox, y); g.lineTo(this.ox + W, y); }
     g.stroke();
 
-    const path = new Path2D();
-    t.pts.forEach((p, i) => i ? path.lineTo(p.x, p.y) : path.moveTo(p.x, p.y));
-    path.closePath();
-    g.lineJoin = 'round';
-    const layer = (w, color, glow, blur) => { g.lineWidth = w; g.strokeStyle = color; g.shadowColor = glow || 'transparent'; g.shadowBlur = blur || 0; g.stroke(path); };
-    layer(2 * (H + G) + 8, '#ff8a2a', '#ff8a2a', 22);   // dinding
-    layer(2 * (H + G) - 4, '#08101c');                   // area luar lintasan
-    layer(2 * H + 10, '#22e5ff', '#22e5ff', 16);         // tepi lintasan
-    layer(2 * H, '#0e1428');                             // aspal
-    t.zones.forEach(z => {                               // zona pengisian energi
-      const zp = new Path2D();
-      for (let i = z[0]; i <= z[1]; i++) i === z[0] ? zp.moveTo(t.pts[i].x, t.pts[i].y) : zp.lineTo(t.pts[i].x, t.pts[i].y);
-      g.shadowBlur = 0; g.lineWidth = 2 * H - 12; g.strokeStyle = 'rgba(34,229,255,.15)'; g.lineCap = 'butt'; g.stroke(zp);
-      g.lineWidth = 2; g.strokeStyle = 'rgba(34,229,255,.5)'; g.setLineDash([14, 22]); g.stroke(zp); g.setLineDash([]);
-    });
-    g.setLineDash([30, 40]); layer(3, 'rgba(180,107,255,.45)'); g.setLineDash([]);
+    const loop = (path, s, ex, a, z) => {                   // tepi kiri (s=1) atau kanan (s=-1) dengan lebar bervariasi
+      for (let k = 0; k <= z - a; k++) {
+        const i = (a + k) % t.N, p = t.pts[i], d = s * (t.hw[i] + ex), x = p.x - p.ty * d, y = p.y + p.tx * d;
+        k ? path.lineTo(x, y) : path.moveTo(x, y);
+      }
+    };
+    const band = ex => { const p = new Path2D(); loop(p, 1, ex, 0, t.N - 1); p.closePath(); loop(p, -1, ex, 0, t.N - 1); p.closePath(); return p; };
+    const fill = (ex, color, glow, blur) => { g.fillStyle = color; g.shadowColor = glow || 'transparent'; g.shadowBlur = blur || 0; g.fill(band(ex), 'evenodd'); };
+    fill(G + 4, '#ff8a2a', '#ff8a2a', 22);   // dinding
+    fill(G - 4, '#08101c');                   // area luar lintasan
+    fill(5, '#22e5ff', '#22e5ff', 16);        // tepi lintasan
+    fill(0, '#0e1428');                       // aspal
+    g.shadowBlur = 0;
 
-    const p0 = t.pts[0];                                 // garis start/finis
+    t.zones.forEach(z => {                    // zona pengisian energi
+      const p = new Path2D(), c = new Path2D();
+      loop(p, 1, -6, z[0], z[1]);
+      for (let k = z[1] - z[0]; k >= 0; k--) { const i = (z[0] + k) % t.N, q = t.pts[i], d = -(t.hw[i] - 6); p.lineTo(q.x - q.ty * d, q.y + q.tx * d); }
+      p.closePath(); g.fillStyle = 'rgba(34,229,255,.15)'; g.fill(p);
+      for (let k = 0; k <= z[1] - z[0]; k++) { const q = t.pts[(z[0] + k) % t.N]; k ? c.lineTo(q.x, q.y) : c.moveTo(q.x, q.y); }
+      g.lineWidth = 2; g.strokeStyle = 'rgba(34,229,255,.5)'; g.setLineDash([14, 22]); g.stroke(c); g.setLineDash([]);
+    });
+    const mid = new Path2D();
+    t.pts.forEach((p, i) => i ? mid.lineTo(p.x, p.y) : mid.moveTo(p.x, p.y)); mid.closePath();
+    g.lineWidth = 3; g.strokeStyle = 'rgba(180,107,255,.4)'; g.setLineDash([30, 40]); g.stroke(mid); g.setLineDash([]);
+
+    if (t.islands.length) {                   // pulau percabangan
+      g.fillStyle = '#ff8a2a'; g.shadowColor = '#ff8a2a'; g.shadowBlur = 18;
+      t.islands.forEach(o => { g.beginPath(); g.arc(o.x, o.y, o.r + 3, 0, 6.283); g.fill(); });
+      g.shadowBlur = 0; g.fillStyle = '#08101c';
+      t.islands.forEach(o => { g.beginPath(); g.arc(o.x, o.y, o.r - 3, 0, 6.283); g.fill(); });
+    }
+
+    const p0 = t.pts[0], H0 = t.hw[0];        // garis start/finis
     g.save(); g.translate(p0.x, p0.y); g.rotate(Math.atan2(p0.ty, p0.tx));
-    const cells = 10, s = 2 * H / cells;
-    for (let r = 0; r < 2; r++) for (let c = 0; c < cells; c++) { g.fillStyle = (r + c) % 2 ? '#fff' : '#111'; g.fillRect(r * 12 - 12, -H + c * s, 12, s); }
+    const cells = 10, s = 2 * H0 / cells;
+    for (let r = 0; r < 2; r++) for (let c = 0; c < cells; c++) { g.fillStyle = (r + c) % 2 ? '#fff' : '#111'; g.fillRect(r * 12 - 12, -H0 + c * s, 12, s); }
     g.restore();
   },
   snap(car) { this.cam.x = car.x; this.cam.y = car.y; this.cam.z = this.baseZoom; this.trail.length = 0; this.sparks.length = 0; },
@@ -73,9 +91,9 @@ MV.Renderer = {
     }
   },
   drawCheckpoints(g, cp) {
-    const H = MV.CONFIG.TRACK_HALF, pulse = 0.65 + 0.35 * Math.sin(Date.now() / 160);
+    const pulse = 0.65 + 0.35 * Math.sin(Date.now() / 160);
     cp.idx.forEach((pi, k) => {
-      const p = this.track.pts[pi], nx = -p.ty, ny = p.tx, next = k === cp.next;
+      const p = this.track.pts[pi], H = this.track.hw[pi], nx = -p.ty, ny = p.tx, next = k === cp.next;
       if (!next && k === 0) return;
       g.strokeStyle = next ? '#ff8a2a' : 'rgba(34,229,255,.28)'; g.lineWidth = next ? 6 : 3;
       g.globalAlpha = next ? pulse : 1; g.shadowColor = '#ff8a2a'; g.shadowBlur = next ? 16 : 0;
@@ -121,18 +139,32 @@ MV.Renderer = {
     });
     g.shadowBlur = 0;
   },
+  drawCar(g, car, color, glow) {
+    g.save(); g.translate(car.x, car.y); g.rotate(car.angle);
+    if (car.boosting) { g.fillStyle = 'rgba(255,138,42,.9)'; g.shadowColor = '#ff8a2a'; g.shadowBlur = 18; g.beginPath(); g.moveTo(-18, -5); g.lineTo(-36 - Math.random() * 14, 0); g.lineTo(-18, 5); g.fill(); }
+    g.shadowColor = color; g.shadowBlur = glow ? 14 : 0;
+    g.fillStyle = '#0b1020'; g.strokeStyle = color; g.lineWidth = 2.5; g.lineJoin = 'round';
+    g.beginPath();
+    [[22, 0], [8, -9], [-14, -12], [-18, -6], [-18, 6], [-14, 12], [8, 9]].forEach((p, i) => i ? g.lineTo(p[0], p[1]) : g.moveTo(p[0], p[1]));
+    g.closePath(); g.fill(); g.stroke();
+    g.shadowBlur = 0; g.fillStyle = color; g.globalAlpha = 0.8;
+    g.beginPath(); g.moveTo(10, 0); g.lineTo(0, -5); g.lineTo(-7, -5); g.lineTo(-7, 5); g.lineTo(0, 5); g.closePath(); g.fill();
+    g.globalAlpha = 1; g.fillStyle = car.braking ? '#ff3b3b' : '#6b1d1d';
+    g.fillRect(-20, -9, 3, 5); g.fillRect(-20, 4, 3, 5);
+    g.restore();
+  },
   draw(car, race) {
     const g = this.ctx, d = this.dpr, c = this.cam, z = c.z;
     const sx = (Math.random() - 0.5) * 14 * this.shake, sy = (Math.random() - 0.5) * 14 * this.shake;
     g.setTransform(1, 0, 0, 1, 0, 0); g.fillStyle = '#05070f'; g.fillRect(0, 0, this.cv.width, this.cv.height);
     g.setTransform(d * z, 0, 0, d * z, d * (this.w / 2 - c.x * z + sx), d * (this.h / 2 - c.y * z + sy));
-    g.drawImage(this.off, this.ox, this.oy);
-
+    g.drawImage(this.off, this.ox, this.oy, this.ow, this.oh);
     if (race && race.cp) this.drawCheckpoints(g, race.cp);
     if (race && race.tokens) this.drawTokens(g, race);
     if (race && race.obstacles) this.drawObstacles(g, race);
     if (race && race.gates) this.drawGates(g, race.gates);
     if (race && race.gh && race.time > 0) this.drawGhost(g, race);
+
     g.lineWidth = 5; g.lineCap = 'round';                // jejak kendaraan
     for (let i = 1; i < this.trail.length; i++) {
       g.strokeStyle = car.spec.color; g.globalAlpha = i / this.trail.length * 0.35;
@@ -142,18 +174,7 @@ MV.Renderer = {
     g.fillStyle = '#ffd27a';
     this.sparks.forEach(s => { g.globalAlpha = Math.max(0, s.life / 0.45); g.fillRect(s.x - 1.5, s.y - 1.5, 3, 3); });
     g.globalAlpha = 1;
-
-    g.save(); g.translate(car.x, car.y); g.rotate(car.angle);
-    if (car.boosting) { g.fillStyle = 'rgba(255,138,42,.9)'; g.shadowColor = '#ff8a2a'; g.shadowBlur = 18; g.beginPath(); g.moveTo(-18, -5); g.lineTo(-36 - Math.random() * 14, 0); g.lineTo(-18, 5); g.fill(); }
-    g.shadowColor = car.spec.color; g.shadowBlur = 14;
-    g.fillStyle = '#0b1020'; g.strokeStyle = car.spec.color; g.lineWidth = 2.5; g.lineJoin = 'round';
-    g.beginPath();
-    [[22, 0], [8, -9], [-14, -12], [-18, -6], [-18, 6], [-14, 12], [8, 9]].forEach((p, i) => i ? g.lineTo(p[0], p[1]) : g.moveTo(p[0], p[1]));
-    g.closePath(); g.fill(); g.stroke();
-    g.shadowBlur = 0; g.fillStyle = car.spec.color; g.globalAlpha = 0.8;
-    g.beginPath(); g.moveTo(10, 0); g.lineTo(0, -5); g.lineTo(-7, -5); g.lineTo(-7, 5); g.lineTo(0, 5); g.closePath(); g.fill();
-    g.globalAlpha = 1; g.fillStyle = car.braking ? '#ff3b3b' : '#6b1d1d';
-    g.fillRect(-20, -9, 3, 5); g.fillRect(-20, 4, 3, 5);
-    g.restore();
+    if (race && race.npcs) race.npcs.forEach(n => this.drawCar(g, n, n.color, false));
+    this.drawCar(g, car, car.spec.color, true);
   }
 };

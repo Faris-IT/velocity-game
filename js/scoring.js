@@ -4,21 +4,24 @@ MV.Scoring = {
   TA_SCORE: { Gold: 6500, Silver: 5000, Bronze: 3000 },
   TA_LAP_TARGET: 22, TA_HIT_PENALTY: 50,
   fmt(t) { t = Math.max(0, t); const m = Math.floor(t / 60), s = t - m * 60; return m + ':' + (s < 10 ? '0' : '') + s.toFixed(2); },
+  sc(T, r) { const k = r.track.tscale; return { Gold: T.Gold * k, Silver: T.Silver * k, Bronze: T.Bronze * k }; },        // ambang waktu mengikuti panjang/kesulitan lintasan
+  scHigh(T, r) { const k = r.track.tscale; return { Gold: T.Gold / k, Silver: T.Silver / k, Bronze: T.Bronze / k }; },
   medalLow(v, T) { return v <= T.Gold ? 'Gold' : v <= T.Silver ? 'Silver' : v <= T.Bronze ? 'Bronze' : null; },
   medalHigh(v, T) { return v >= T.Gold ? 'Gold' : v >= T.Silver ? 'Silver' : v >= T.Bronze ? 'Bronze' : null; },
   best(list) { return list.length ? Math.min.apply(null, list) : null; },
-  lapBonus(lt) { return 1000 + Math.max(0, Math.round((this.TA_LAP_TARGET - lt) * 30)); },
+  lapBonus(lt, k) { return 1000 + Math.max(0, Math.round((this.TA_LAP_TARGET * k - lt) * 30)); },
   finishGrandPrix(r) {
-    const total = r.time + r.penalty, per = total / r.laps, M = this.GP_PER_LAP;
+    const total = r.time + r.penalty, per = total / r.laps, M = this.sc(this.GP_PER_LAP, r);
     const medal = per <= M.Gold ? 'Gold' : per <= M.Silver ? 'Silver' : per <= M.Bronze ? 'Bronze' : null;
-    r.end({ win: true, title: 'FINISH!', mainLabel: 'Waktu akhir', main: this.fmt(total), medal,
-      lines: [['Waktu balap', this.fmt(r.time)],
+    const pos = r.npcs ? MV.NPC.finalPos(r) : 0, n = r.npcs ? r.npcs.length + 1 : 0;
+    r.end({ win: true, title: pos ? (pos === 1 ? 'JUARA 1!' : 'POSISI ' + pos + '/' + n) : 'FINISH!', mainLabel: 'Waktu akhir', main: this.fmt(total), medal,
+      lines: [].concat(pos ? [['Posisi', pos + ' / ' + n]] : [], [['Waktu balap', this.fmt(r.time)],
               ['Penalti', '+' + r.penalty.toFixed(1) + ' dtk (' + r.hits + ' tabrakan)'],
-              ['Putaran terbaik', this.fmt(this.best(r.lapTimes))]],
+              ['Putaran terbaik', this.fmt(this.best(r.lapTimes))]]),
       recordKey: 'grandprix-' + r.laps, value: total, better: 'low' });
   },
   finishTimeAttack(r) {
-    const score = Math.max(0, r.score - r.hits * this.TA_HIT_PENALTY), M = this.TA_SCORE;
+    const score = Math.max(0, r.score - r.hits * this.TA_HIT_PENALTY), M = this.scHigh(this.TA_SCORE, r);
     const medal = score >= M.Gold ? 'Gold' : score >= M.Silver ? 'Silver' : score >= M.Bronze ? 'Bronze' : null;
     r.end({ win: !!medal, title: medal ? 'WAKTU HABIS' : 'WAKTU HABIS - BELUM MEDALI', mainLabel: 'Skor akhir', main: String(score), medal,
       lines: [['Putaran valid', String(r.laps)],

@@ -3,7 +3,7 @@ MV.MODES.perfectlap = {
   init(r) { r.target = 3; r.pts = 0; r.pen = 0; r.bonus = 0; },
   score(r) { return Math.max(0, Math.round(r.pts + r.bonus - r.pen)); },
   onLap(r, lt) {
-    r.pts += Math.max(0, Math.round(1000 - (lt - 13) * 40));
+    r.pts += Math.max(0, Math.round(1000 - (lt / r.track.tscale - 13) * 40));
     if (r.laps < r.target) return;
     const S = MV.Scoring, sc = this.score(r);
     r.end({ win: true, title: r.pen === 0 ? 'LAP SEMPURNA!' : 'SELESAI', mainLabel: 'Skor', main: String(sc), medal: S.medalHigh(sc, this.T),

@@ -11,5 +11,6 @@ MV.MODE_LIST = [
   { id: 'survival',        name: 'Survival Circuit',  tag: 'Bertahan hidup',      diff: 5, stage: 4, goal: 'Bertahan 180 detik di lintasan yang makin sulit.' },
   { id: 'checkpointblitz', name: 'Checkpoint Blitz',  tag: 'Kecepatan dan rute',  diff: 4, stage: 4, goal: 'Lewati 12 checkpoint dalam 100 detik.' },
   { id: 'riskreward',      name: 'Risk & Reward',     tag: 'Strategi',            diff: 4, stage: 4, goal: 'Raih 1.500 kredit sebelum 2 putaran selesai.' },
-  { id: 'trials',          name: 'Velocity Trials',   tag: 'Serangkaian misi',    diff: 5, stage: 4, goal: 'Selesaikan 10 tantangan dengan aturan berbeda.' }
+  { id: 'trials',          name: 'Velocity Trials',   tag: 'Serangkaian misi',    diff: 5, stage: 4, goal: 'Selesaikan 10 tantangan dengan aturan berbeda.' },
+  { id: 'cup',             name: 'Rival Cup',         tag: 'Kejuaraan NPC',       diff: 4, stage: 4, goal: '4 balapan di 4 lintasan melawan 5 NPC. Kumpulkan poin terbanyak.' }
 ];
