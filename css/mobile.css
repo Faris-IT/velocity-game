@@ -1,0 +1,14 @@
+/* Kontrol sentuh dan penyesuaian layar kecil */
+#touch{display:none}
+body.touch-on #touch{display:block}
+body.touch-off #touch{display:none!important}
+@media (pointer:coarse){ body:not(.touch-off) #touch{display:block} #help{display:none} }
+.pad{position:fixed;bottom:calc(18px + env(safe-area-inset-bottom,0px));display:flex;gap:12px}
+.pad.left{left:16px}.pad.right{right:16px}
+.pad button,#pausebtn,#boostbtn{touch-action:none;border:2px solid var(--cyan);background:rgba(10,16,32,.55);color:var(--cyan);font-weight:700;font-size:16px;border-radius:18px;width:var(--tb);height:var(--tb)}
+.pad button.on,#pausebtn.on{background:rgba(var(--ar),.28);box-shadow:0 0 18px rgba(var(--ar),.6)}
+[data-act=up]{border-color:var(--orange)!important;color:var(--orange)!important;height:calc(var(--tb) * 1.25)!important}
+#pausebtn{position:fixed;right:16px;top:calc(12px + env(safe-area-inset-top,0px));width:48px;height:48px;border-radius:14px}
+#boostbtn{position:fixed;right:16px;bottom:calc(18px + var(--tb) * 1.25 + 10px);height:calc(var(--tb) * .72);border-color:var(--purple);color:var(--purple);font-size:14px}
+#boostbtn.on{background:rgba(var(--br),.3);box-shadow:0 0 18px rgba(var(--br),.7)}
+@media (max-width:520px){ #kmh{font-size:40px} #stats .tm{font-size:26px} #stats{font-size:12px} #center{font-size:72px} }

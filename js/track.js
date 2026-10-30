@@ -1,4 +1,6 @@
 // Lintasan dibangun dari data: kurva dasar -> titik berjarak sama (7,57 px) -> lebar, kelengkungan, pulau, zona.
+MV.getTrack = function (id) { MV._tc = MV._tc || {}; return MV._tc[id] || (MV._tc[id] = MV.buildTrack(MV.TRACKS[id])); };
+
 MV.buildTrack = function (def) {
   const SP = 7.57, H = MV.CONFIG.TRACK_HALF, G = MV.CONFIG.GRASS;
   const clamp = (v, a, b) => Math.max(a, Math.min(b, v)), wrap = a => Math.atan2(Math.sin(a), Math.cos(a));

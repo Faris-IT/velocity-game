@@ -13,7 +13,7 @@ MV.MODES.energy = {
     const S = MV.Scoring, all = r.cells === r.tokens.length;
     r.end({ win: true, title: all ? 'SEMUA ENERGI TERKUMPUL!' : 'ENERGI TERKUMPUL', mainLabel: 'Waktu', main: S.fmt(r.time), medal: S.medalLow(r.time, S.sc(this.T, r)),
       lines: [['Sel energi', r.cells + ' / ' + r.tokens.length], ['Jalur berisiko', r.risk + ' / 10'], ['Tabrakan', String(r.hits)]],
-      recordKey: 'energy', value: r.time, better: 'low' });
+      all, recordKey: 'energy', value: r.time, better: 'low' });
   },
   update(r) {
     if (r.time >= r.limit) r.end({ win: false, title: 'WAKTU HABIS', mainLabel: 'Sel energi', main: r.cells + ' / ' + r.need, medal: null,

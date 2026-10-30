@@ -1,73 +1,107 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="id">
-<head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,user-scalable=no">
-<title>Mufa Velocity</title>
-<link rel="stylesheet" href="css/style.css">
-<link rel="stylesheet" href="css/menu.css">
-</head>
-<body>
-<canvas id="game"></canvas>
-<div id="hud">
-  <div id="vname"></div>
-  <div id="speed"><b id="kmh">0</b><span>km/h</span></div>
-  <div id="boost"><i id="bfill"></i></div>
-  <div id="hp"><i id="hpfill"></i></div>
-</div>
-<div id="stats"></div>
-<div id="center"></div>
-<div id="fx"></div>
-<div id="coach"></div>
-<div id="msg"></div>
-<div id="screen"></div>
-<div id="help">W/↑ gas &nbsp; S/↓ rem &nbsp; A/D belok &nbsp; Space boost &nbsp; P jeda &nbsp; R ulang </div>
-<div id="touch">
-  <div class="pad left"><button data-act="left">◀</button><button data-act="right">▶</button></div>
-  <div class="pad right"><button data-act="down">REM</button><button data-act="up">GAS</button></div>
-  <button id="boostbtn" data-act="boost">BOOST</button>
-  <button id="pausebtn" data-act="pause">II</button>
-</div>
-<script src="js/config.js"></script>
-<script src="data/modes.js"></script>
-<script src="data/vehicles.js"></script>
-<script src="data/tracks.js"></script>
-<script src="data/trials.js"></script>
-<script src="js/storage.js"></script>
-<script src="js/input.js"></script>
-<script src="js/track.js"></script>
-<script src="js/vehicle.js"></script>
-<script src="js/collision.js"></script>
-<script src="js/physics.js"></script>
-<script src="js/boost.js"></script>
-<script src="js/drift.js"></script>
-<script src="js/tokens.js"></script>
-<script src="js/obstacles.js"></script>
-<script src="js/ai.js"></script>
-<script src="js/npc.js"></script>
-<script src="js/gates.js"></script>
-<script src="js/ghost.js"></script>
-<script src="js/demo.js"></script>
-<script src="js/checkpoints.js"></script>
-<script src="js/scoring.js"></script>
-<script src="js/game-state.js"></script>
-<script src="modes/grand-prix.js"></script>
-<script src="modes/time-attack.js"></script>
-<script src="modes/perfect-lap.js"></script>
-<script src="modes/energy-collector.js"></script>
-<script src="modes/boost-rush.js"></script>
-<script src="modes/drift-master.js"></script>
-<script src="modes/hazard-run.js"></script>
-<script src="modes/survival-circuit.js"></script>
-<script src="modes/checkpoint-blitz.js"></script>
-<script src="modes/risk-reward.js"></script>
-<script src="modes/ghost-rival.js"></script>
-<script src="modes/velocity-trials.js"></script>
-<script src="modes/rival-cup.js"></script>
-<script src="modes/trial.js"></script>
-<script src="modes/tutorial.js"></script>
-<script src="js/ui.js"></script>
-<script src="js/renderer.js"></script>
-<script src="js/main.js"></script>
-</body>
+  <head>
+    <meta charset="utf-8" />
+    <meta
+      name="viewport"
+      content="width=device-width,initial-scale=1,viewport-fit=cover,user-scalable=no"
+    />
+    <title>Mufa Velocity - Master the Track. Beat the Clock.</title>
+    <meta
+      name="description"
+      content="Game balap arcade top-down bergaya neon futuristik: 13 mode, 4 lintasan, 3 kendaraan, NPC, ghost, dan achievement. HTML, CSS, dan JavaScript murni tanpa aset eksternal."
+    />
+    <meta name="theme-color" content="#05070f" />
+    <meta property="og:title" content="Mufa Velocity" />
+    <meta
+      property="og:description"
+      content="Master the Track. Beat the Clock. Game balap arcade neon dari HTML, CSS, dan JavaScript murni."
+    />
+    <meta property="og:type" content="website" />
+    <meta property="og:image" content="assets/social-preview.png" />
+    <link
+      rel="icon"
+      href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%2305070f'/%3E%3Cpath d='M32 8 46 50 32 42 18 50Z' fill='%2322e5ff'/%3E%3C/svg%3E"
+    />
+    <link rel="stylesheet" href="css/style.css" />
+    <link rel="stylesheet" href="css/hud.css" />
+    <link rel="stylesheet" href="css/menu.css" />
+    <link rel="stylesheet" href="css/mobile.css" />
+    <link rel="stylesheet" href="css/themes.css" />
+  </head>
+  <body>
+    <canvas id="game"></canvas>
+    <div id="hud">
+      <div id="vname"></div>
+      <div id="speed"><b id="kmh">0</b><span>km/h</span></div>
+      <div id="boost"><i id="bfill"></i></div>
+      <div id="hp"><i id="hpfill"></i></div>
+    </div>
+    <div id="stats"></div>
+    <div id="center"></div>
+    <div id="fx"></div>
+    <div id="coach"></div>
+    <div id="msg"></div>
+    <div id="screen"></div>
+    <div id="help">
+      W/↑ gas &nbsp; S/↓ rem &nbsp; A/D belok &nbsp; Space boost &nbsp; P jeda
+      &nbsp; R ulang
+    </div>
+    <div id="touch">
+      <div class="pad left">
+        <button data-act="left">◀</button><button data-act="right">▶</button>
+      </div>
+      <div class="pad right">
+        <button data-act="down">REM</button><button data-act="up">GAS</button>
+      </div>
+      <button id="boostbtn" data-act="boost">BOOST</button>
+      <button id="pausebtn" data-act="pause">II</button>
+    </div>
+    <script src="js/config.js"></script>
+    <script src="data/modes.js"></script>
+    <script src="data/vehicles.js"></script>
+    <script src="data/tracks.js"></script>
+    <script src="data/trials.js"></script>
+    <script src="data/achievements.js"></script>
+    <script src="js/storage.js"></script>
+    <script src="js/settings.js"></script>
+    <script src="js/audio.js"></script>
+    <script src="js/input.js"></script>
+    <script src="js/track.js"></script>
+    <script src="js/boost.js"></script>
+    <script src="js/drift.js"></script>
+    <script src="js/tokens.js"></script>
+    <script src="js/obstacles.js"></script>
+    <script src="js/ai.js"></script>
+    <script src="js/npc.js"></script>
+    <script src="js/gates.js"></script>
+    <script src="js/ghost.js"></script>
+    <script src="js/demo.js"></script>
+    <script src="js/vehicle.js"></script>
+    <script src="js/collision.js"></script>
+    <script src="js/physics.js"></script>
+    <script src="js/checkpoints.js"></script>
+    <script src="js/scoring.js"></script>
+    <script src="js/game-state.js"></script>
+    <script src="modes/grand-prix.js"></script>
+    <script src="modes/time-attack.js"></script>
+    <script src="modes/perfect-lap.js"></script>
+    <script src="modes/energy-collector.js"></script>
+    <script src="modes/boost-rush.js"></script>
+    <script src="modes/drift-master.js"></script>
+    <script src="modes/hazard-run.js"></script>
+    <script src="modes/survival-circuit.js"></script>
+    <script src="modes/checkpoint-blitz.js"></script>
+    <script src="modes/risk-reward.js"></script>
+    <script src="modes/ghost-rival.js"></script>
+    <script src="modes/velocity-trials.js"></script>
+    <script src="modes/rival-cup.js"></script>
+    <script src="modes/trial.js"></script>
+    <script src="modes/tutorial.js"></script>
+    <script src="js/achievements.js"></script>
+    <script src="js/art.js"></script>
+    <script src="js/ui.js"></script>
+    <script src="js/renderer.js"></script>
+    <script src="js/main.js"></script>
+  </body>
 </html>

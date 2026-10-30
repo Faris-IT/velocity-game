@@ -1,4 +1,5 @@
 window.MV = window.MV || {};
+MV.VERSION = '1.0.0';
 MV.CONFIG = {
   STEP: 1 / 120,      // langkah fisika tetap (detik)
   MAX_FRAME: 0.1,     // batas delta time per frame
@@ -12,5 +13,6 @@ MV.CONFIG = {
   BOOST_ACCEL: 520,   // tambahan akselerasi saat boost
   BOOST_TOP: 1.3,     // batas kecepatan saat boost (x top speed)
   ZONE_CHARGE: 45,    // pengisian energi per detik di zona cyan
-  CELL_ENERGY: 8      // energi dari tiap sel
+  CELL_ENERGY: 8,     // energi dari tiap sel
+  STEER_RATE: 9       // respons setir (diatur dari Pengaturan)
 };

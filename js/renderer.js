@@ -14,7 +14,7 @@ MV.Renderer = {
   },
   // Lintasan statis digambar sekali ke canvas terpisah agar frame tetap ringan.
   bake() {
-    const C = MV.CONFIG, t = this.track, b = t.bounds, G = C.GRASS, m = Math.max.apply(null, t.hw) + G + 160;
+    const C = MV.CONFIG, T = MV.Settings.theme(), t = this.track, b = t.bounds, G = C.GRASS, m = Math.max.apply(null, t.hw) + G + 160;
     const W = b.maxX - b.minX + m * 2, Hh = b.maxY - b.minY + m * 2, bs = Math.min(1, Math.sqrt(9e6 / (W * Hh)));
     const off = this.off = document.createElement('canvas');
     this.ox = b.minX - m; this.oy = b.minY - m; this.ow = W; this.oh = Hh;
@@ -22,7 +22,7 @@ MV.Renderer = {
     const g = off.getContext('2d');
     g.scale(bs, bs); g.translate(-this.ox, -this.oy);
     g.fillStyle = '#05070f'; g.fillRect(this.ox, this.oy, W, Hh);
-    g.strokeStyle = 'rgba(90,130,255,.07)'; g.lineWidth = 1; g.beginPath();
+    g.strokeStyle = 'rgba(' + T.grid + ',.07)'; g.lineWidth = 1; g.beginPath();
     for (let x = Math.ceil(this.ox / 120) * 120; x < this.ox + W; x += 120) { g.moveTo(x, this.oy); g.lineTo(x, this.oy + Hh); }
     for (let y = Math.ceil(this.oy / 120) * 120; y < this.oy + Hh; y += 120) { g.moveTo(this.ox, y); g.lineTo(this.ox + W, y); }
     g.stroke();
@@ -35,9 +35,9 @@ MV.Renderer = {
     };
     const band = ex => { const p = new Path2D(); loop(p, 1, ex, 0, t.N - 1); p.closePath(); loop(p, -1, ex, 0, t.N - 1); p.closePath(); return p; };
     const fill = (ex, color, glow, blur) => { g.fillStyle = color; g.shadowColor = glow || 'transparent'; g.shadowBlur = blur || 0; g.fill(band(ex), 'evenodd'); };
-    fill(G + 4, '#ff8a2a', '#ff8a2a', 22);   // dinding
+    fill(G + 4, T.wall, T.wall, 22);   // dinding
     fill(G - 4, '#08101c');                   // area luar lintasan
-    fill(5, '#22e5ff', '#22e5ff', 16);        // tepi lintasan
+    fill(5, T.edge, T.edge, 16);        // tepi lintasan
     fill(0, '#0e1428');                       // aspal
     g.shadowBlur = 0;
 
@@ -45,16 +45,16 @@ MV.Renderer = {
       const p = new Path2D(), c = new Path2D();
       loop(p, 1, -6, z[0], z[1]);
       for (let k = z[1] - z[0]; k >= 0; k--) { const i = (z[0] + k) % t.N, q = t.pts[i], d = -(t.hw[i] - 6); p.lineTo(q.x - q.ty * d, q.y + q.tx * d); }
-      p.closePath(); g.fillStyle = 'rgba(34,229,255,.15)'; g.fill(p);
+      p.closePath(); g.fillStyle = 'rgba(' + T.zone + ',.15)'; g.fill(p);
       for (let k = 0; k <= z[1] - z[0]; k++) { const q = t.pts[(z[0] + k) % t.N]; k ? c.lineTo(q.x, q.y) : c.moveTo(q.x, q.y); }
-      g.lineWidth = 2; g.strokeStyle = 'rgba(34,229,255,.5)'; g.setLineDash([14, 22]); g.stroke(c); g.setLineDash([]);
+      g.lineWidth = 2; g.strokeStyle = 'rgba(' + T.zone + ',.5)'; g.setLineDash([14, 22]); g.stroke(c); g.setLineDash([]);
     });
     const mid = new Path2D();
     t.pts.forEach((p, i) => i ? mid.lineTo(p.x, p.y) : mid.moveTo(p.x, p.y)); mid.closePath();
-    g.lineWidth = 3; g.strokeStyle = 'rgba(180,107,255,.4)'; g.setLineDash([30, 40]); g.stroke(mid); g.setLineDash([]);
+    g.lineWidth = 3; g.strokeStyle = T.mid; g.setLineDash([30, 40]); g.stroke(mid); g.setLineDash([]);
 
     if (t.islands.length) {                   // pulau percabangan
-      g.fillStyle = '#ff8a2a'; g.shadowColor = '#ff8a2a'; g.shadowBlur = 18;
+      g.fillStyle = T.wall; g.shadowColor = T.wall; g.shadowBlur = 18;
       t.islands.forEach(o => { g.beginPath(); g.arc(o.x, o.y, o.r + 3, 0, 6.283); g.fill(); });
       g.shadowBlur = 0; g.fillStyle = '#08101c';
       t.islands.forEach(o => { g.beginPath(); g.arc(o.x, o.y, o.r - 3, 0, 6.283); g.fill(); });
@@ -145,10 +145,10 @@ MV.Renderer = {
     g.shadowColor = color; g.shadowBlur = glow ? 14 : 0;
     g.fillStyle = '#0b1020'; g.strokeStyle = color; g.lineWidth = 2.5; g.lineJoin = 'round';
     g.beginPath();
-    [[22, 0], [8, -9], [-14, -12], [-18, -6], [-18, 6], [-14, 12], [8, 9]].forEach((p, i) => i ? g.lineTo(p[0], p[1]) : g.moveTo(p[0], p[1]));
+    car.spec.shape.forEach((p, i) => i ? g.lineTo(p[0], p[1]) : g.moveTo(p[0], p[1]));
     g.closePath(); g.fill(); g.stroke();
     g.shadowBlur = 0; g.fillStyle = color; g.globalAlpha = 0.8;
-    g.beginPath(); g.moveTo(10, 0); g.lineTo(0, -5); g.lineTo(-7, -5); g.lineTo(-7, 5); g.lineTo(0, 5); g.closePath(); g.fill();
+    g.beginPath(); car.spec.cock.forEach((p, i) => i ? g.lineTo(p[0], p[1]) : g.moveTo(p[0], p[1])); g.closePath(); g.fill();
     g.globalAlpha = 1; g.fillStyle = car.braking ? '#ff3b3b' : '#6b1d1d';
     g.fillRect(-20, -9, 3, 5); g.fillRect(-20, 4, 3, 5);
     g.restore();

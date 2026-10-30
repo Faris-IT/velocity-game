@@ -1,0 +1,24 @@
+/* HUD saat balapan */
+#hud{position:fixed;left:16px;top:calc(12px + env(safe-area-inset-top,0px));pointer-events:none}
+#vname{font-size:13px;letter-spacing:.08em;color:var(--purple)}
+#speed{display:flex;align-items:baseline;gap:6px}
+#kmh{font-size:52px;font-weight:700;font-variant-numeric:tabular-nums;color:var(--cyan);text-shadow:0 0 14px rgba(var(--ar),.55);min-width:3ch}
+#speed span{font-size:14px;opacity:.7}
+#boost,#hp{width:150px;height:8px;border-radius:5px;margin-top:4px;overflow:hidden}
+#boost{border:1px solid rgba(var(--ar),.6)}#boost.chg{box-shadow:0 0 10px rgba(var(--ar),.9)}
+#bfill{display:block;height:100%;width:100%;background:linear-gradient(90deg,var(--cyan),var(--orange))}
+#hp{display:none;border:1px solid rgba(255,90,90,.7)}#hp.on{display:block}
+#hpfill{display:block;height:100%;width:100%;background:linear-gradient(90deg,#ff3b3b,#4dff9a)}
+#msg{position:fixed;left:50%;top:22%;transform:translateX(-50%);font-size:26px;font-weight:700;color:var(--orange);text-shadow:0 0 16px rgba(var(--cr),.6);pointer-events:none;text-align:center}
+#help{position:fixed;left:50%;bottom:calc(10px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);font-size:12px;opacity:.55;white-space:nowrap;pointer-events:none}
+#stats{position:fixed;left:50%;top:calc(10px + env(safe-area-inset-top,0px));transform:translateX(-50%);text-align:center;font-size:14px;line-height:1.5;pointer-events:none;text-shadow:0 0 8px #000}
+#stats .tm{font-size:34px;font-weight:700;font-variant-numeric:tabular-nums;color:#fff;text-shadow:0 0 14px rgba(var(--br),.7)}
+#center{position:fixed;left:50%;top:40%;transform:translate(-50%,-50%);font-size:96px;font-weight:800;color:var(--orange);text-shadow:0 0 28px rgba(var(--cr),.7);pointer-events:none}
+#fx{position:fixed;left:50%;top:62%;transform:translateX(-50%);font-size:24px;font-weight:800;color:var(--purple);text-shadow:0 0 16px rgba(var(--br),.8);pointer-events:none;white-space:nowrap}
+#coach{position:fixed;left:50%;top:calc(96px + env(safe-area-inset-top,0px));transform:translateX(-50%);width:min(92vw,400px);display:none;background:rgba(8,12,26,.72);
+  border:1px solid rgba(var(--br),.5);border-radius:14px;padding:10px 14px;font-size:14px;line-height:1.4;text-align:left}
+#coach.on{display:block}#coach b{color:var(--cyan)}
+#coach .pb{height:4px;background:rgba(255,255,255,.12);border-radius:3px;margin:8px 0 6px;overflow:hidden}
+#coach .pb i{display:block;height:100%;background:var(--purple)}
+#coach button{font:inherit;font-size:12px;color:var(--text);opacity:.7;background:none;border:1px solid rgba(255,255,255,.3);border-radius:8px;padding:3px 10px;cursor:pointer;pointer-events:auto}
+body.menu #hud,body.menu #help,body.menu #touch,body.menu #stats{display:none!important}

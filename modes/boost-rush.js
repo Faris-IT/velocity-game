@@ -10,7 +10,7 @@ MV.MODES.boostrush = {
     const S = MV.Scoring, total = r.time + r.penalty, eff = r.used > 0 ? Math.round((1 - r.wasted / r.used) * 100) : 100;
     r.end({ win: true, title: 'FINISH!', mainLabel: 'Waktu akhir', main: S.fmt(total), medal: S.medalLow(total / r.target, S.sc(this.T, r)),
       lines: [].concat(r.npcs ? [['Posisi', MV.NPC.finalPos(r) + ' / ' + (r.npcs.length + 1)]] : [], [['Waktu balap', S.fmt(r.time)], ['Penalti', '+' + r.penalty.toFixed(1) + ' dtk'], ['Energi boost dipakai', Math.round(r.used)],
-              ['Efisiensi boost', eff + '%']]), recordKey: 'boostrush', value: total, better: 'low' });
+              ['Efisiensi boost', eff + '%']]), eff, recordKey: 'boostrush', value: total, better: 'low' });
   },
   hud(r) { return { timer: MV.Scoring.fmt(Math.max(0, r.limit - r.time)), lines: [r.npcs ? MV.NPC.posLine(r) : 'Boost: tahan SPACE', 'Putaran ' + Math.min(r.laps + 1, r.target) + '/' + r.target,
     'Boost terpakai ' + Math.round(r.used), r.penalty > 0 ? 'Penalti +' + r.penalty.toFixed(1) + ' dtk' : MV.Checkpoints.label(r.cp)] }; }

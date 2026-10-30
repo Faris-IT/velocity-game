@@ -2,7 +2,7 @@
 // Sudut kendaraan berputar lebih dulu daripada arah gerak, sehingga muncul momentum dan kendaraan melebar.
 MV.stepCar = function (car, inp, dt, track) {
   const s = car.spec, C = MV.CONFIG;
-  car.steer += (inp.steer - car.steer) * Math.min(1, dt * 9);
+  car.steer += (inp.steer - car.steer) * Math.min(1, dt * C.STEER_RATE);
   car.hitCool = Math.max(0, car.hitCool - dt);
   if (!car.onTrack) car.offTime += dt;
 

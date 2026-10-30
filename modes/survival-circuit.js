@@ -9,7 +9,7 @@ MV.MODES.survival = {
     else { MV.Obstacles.add(L, { type: 'cone', idx, lat }); if (hard > 0.5) MV.Obstacles.add(L, { type: 'cone', idx: (idx + 10) % N, lat: -lat }); }
   },
   update(r, dt, car) {
-    r.dTypes.forEach(t => { r.hp -= this.DMG[t] || 10; });
+    r.dTypes.forEach(t => { r.hp -= (this.DMG[t] || 10) * 100 / car.spec.dur; });
     if (car.charging) r.hp = Math.min(100, r.hp + 6 * dt);                    // zona cyan = zona istirahat
     if (r.time >= r.nextSpawn) { this.spawn(r, car); r.nextSpawn = r.time + Math.max(1.4, 6.5 - r.time / 32); }   // makin sering seiring waktu
     const L = r.obstacles, N = r.track.N;
